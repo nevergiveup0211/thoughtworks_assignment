@@ -1,0 +1,2 @@
+- private address space 192.168.33.0/24 is not being used in the network. This is being used for the private host only network in vagrant.
+- assuming a ubuntu linux workstation 
