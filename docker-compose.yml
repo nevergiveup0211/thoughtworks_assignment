@@ -1,0 +1,12 @@
+version: '1'
+services:
+  dynamic:
+    build: ./dynamic
+    ports:
+      - 8080:8080
+  static:
+    build: ./static/
+    links:
+      - dynamic
+    ports:
+      - 80:80
