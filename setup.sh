@@ -17,13 +17,13 @@ if [ ! -x "$(which docker)" ]; then
      
     echo "installing docker-ce"
     if [ ! -x "$(which docker)" ]; then
-        curl -fsSL get.docker.com -o get-docker.sh
-        sudo sh get-docker.sh
+        curl -sSL https://get.docker.com |sh
+        echo;exit
     # update user with docker group. to run docker commands with out sudo
-    fi
-
     u="$USER"
     [ ! -x "$(getent group docker | grep $u)" ] && sudo usermod -aG docker $u
+    echo "please exit the session for the user permission to take effect"
+    fi
         
     echo "installing docker-compose"
     compose_test=$(which docker-compose)
