@@ -30,15 +30,7 @@ if [ ! -x "$(which docker)" ]; then
         sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
     fi
-    
-    echo "starting local swarm cluster"
-    swarm_test=$(docker stack ps test)
-    if [ $? -ne 0 ]; then
-        # manager_token=$(docker swarm join-token --quiet manager)
-        docker swarm init --advertise-addr eth0
-        swarm_init_cmd=$(docker swarm join-token manager | sed -n 3p | sed -e 's/^[ \t]*//')
-        $swarm_init_cmd
-    fi
+
     echo "building local images. please be patient as this will take a while..."
     docker-compose build
     # add ab
@@ -47,7 +39,7 @@ if [ ! -x "$(which docker)" ]; then
     exit
 fi
 
-# script help
+# script help function
 print_help() { 
    echo "$PROGNAME: script to install and deploy docker containers of static and dynamic content"
    echo "usage: $PROGNAME [arg]"
@@ -56,10 +48,22 @@ print_help() {
    echo
    echo "testing    setup the local testing environment"
    echo "status     shows the docker stack status"
+   echo "swarm      setup local swarm cluster with one node"
    echo "benchmark  run ab tests" 
    echo "images     list images"
    exit
 }
+
+if [ "$1" = "swarm"]; then  
+    echo "starting local swarm cluster"
+    swarm_test=$(docker stack ps test)
+    if [ $? -ne 0 ]; then
+        # manager_token=$(docker swarm join-token --quiet manager)
+        docker swarm init --advertise-addr eth0
+        swarm_init_cmd=$(docker swarm join-token manager | sed -n 3p | sed -e 's/^[ \t]*//')
+        $swarm_init_cmd
+    fi
+fi
 
 if [ $# -lt 1 ] || [ "$1" = "help" ]; then
     print_help
@@ -68,6 +72,11 @@ fi
 
 
 if [ "$1" = "testing" ]; then
+    swarm_test=$(docker stack ps test)
+    if [ $? -ne 0 ]; then
+        echo "swarm is not setup yet. plese run the below command"
+        echo "run $PROGNAME swarm"
+    fi
 	if [ $# -lt 2 ]; then
         echo
         echo "usage : $PROGNAME $1 [ deploy | rm | services ]"
