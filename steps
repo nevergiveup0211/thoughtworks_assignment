@@ -9,3 +9,9 @@ docker swarm init
 docker swarm join-token manager
 docker swarm join --token SWMTKN-1-2qjcvbhjcn5ma5lta2k1wwe94g7zol004jt8k94qhdfs9asyje-9ilgl0a4sgrqgsphr4x1i7zse 192.168.65.3:2377
 docker stack deploy --compose-file docker-stack.yml companynews
+
+
+Error response from daemon: could not choose an IP address to advertise since this system has multiple addresses on different interfaces (10.0.2.15 on eth0 and 192.168.33.10 on eth1) - specify one with --advertise-addr
+
+
+swarm_init_cmd=$(docker swarm join-token manager --advertise-addr eth0 | sed -n 3p | sed -e 's/^[ \t]*//')
