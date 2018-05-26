@@ -1,0 +1,11 @@
+docker-compose build
+docker ps
+docker stack --help
+docker stack deploy --compose-file docker-stack.yml companynews
+cd workspace
+cd thoughtworks_assignment
+cd local_setup
+docker swarm init
+docker swarm join-token manager
+docker swarm join --token SWMTKN-1-2qjcvbhjcn5ma5lta2k1wwe94g7zol004jt8k94qhdfs9asyje-9ilgl0a4sgrqgsphr4x1i7zse 192.168.65.3:2377
+docker stack deploy --compose-file docker-stack.yml companynews
