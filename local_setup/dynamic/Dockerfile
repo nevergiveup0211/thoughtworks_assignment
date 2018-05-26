@@ -3,7 +3,6 @@
 # 
 # WORKDIR /usr/local/tomcat/webapps
 # CMD mkdir -p /Users/dcameron/persistence/files\*
-# CMD rm -rf /usr/local/tomcat/webapps/ROOT
 # ADD https://s3.amazonaws.com/infra-assessment/companyNews.war .
 # CMD ["/usr/local/tomcat/bin/catalina.sh", "run"]
 
