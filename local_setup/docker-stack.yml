@@ -1,0 +1,28 @@
+version: "3.6"
+services:
+  dynamic:
+    image: local_setup_dynamic
+    # build: ./dynamic
+    ports:
+      - "8080:8080"
+    networks:
+      - frontend
+    deploy:
+      replicas: 1
+    environment:
+      - VIRTUAL_HOST=dynamic
+
+  static:
+    image: local_setup_static
+    # build: ./static/
+    depends_on:
+      - dynamic
+    ports:
+      - "80:80"
+    environment:
+      - VIRTUAL_HOST=static      
+    networks:
+      - frontend
+
+networks:
+  frontend:
