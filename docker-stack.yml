@@ -1,7 +1,7 @@
 version: "3.6"
 services:
   dynamic:
-    image: local_setup_dynamic
+    image: thoughtworks_assignment_dynamic
     # build: ./dynamic
     ports:
       - "8080:8080"
@@ -13,7 +13,7 @@ services:
       - VIRTUAL_HOST=dynamic
 
   static:
-    image: local_setup_static
+    image: thoughtworks_assignment_static
     # build: ./static/
     depends_on:
       - dynamic

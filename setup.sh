@@ -1,166 +1,121 @@
 #!/bin/bash
+# setup: script to install and deploy docker containers of static and dynamic content
+# Author: Sri Krishna G
 
+# checks and install/setup docker, docker-compose and docker swarm 
+AUTHOR="Sri Krishna G"
+PROGNAME=`basename $0`
+VERSION="0.1.0"
 
-# check for pre-reqs
 if [ ! -x "$(which docker)" ]; then
-    if [ "Linux" != "$(uname)" ]; then
-       echo "This script is meant for Ubuntu Trusty 14.04 (LTS)"
+    unamestr=`uname` 
+    if [[ "$unamestr" != 'Linux' ]]; then
+       echo "The script is tested only for Linux flavoured distributions"
        exit
     fi
      
-    echo Check/Installing docker
-    [ ! -x "$(which docker)" ] && curl -sSL https://get.docker.com |sh
+    echo "installing docker-ce"
+    if [ ! -x "$(which docker)" ]; then
+        curl -fsSL get.docker.com -o get-docker.sh
+        sudo sh get-docker.sh
+    # update user with docker group. to run docker commands with out sudo
+    fi
 
-    # add ubunto to the docker group if it is not there
-    [ ! -x "$(getent group docker | grep ubuntu)" ] && sudo usermod -aG docker ubuntu
+    u="$USER"
+    [ ! -x "$(getent group docker | grep $u)" ] && sudo usermod -aG docker $u
         
-    # Now lets get docker compose
-    echo Check/Installing docker-compose
-    dc=$(which docker-compose)
-
+    echo "installing docker-compose"
+    compose_test=$(which docker-compose)
     if [ $? -ne 0 ]; then
-        curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > docker-compose
-        chmod +x docker-compose
-        sudo mv docker-compose /usr/local/bin/docker-compose
+        sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
     fi
     
-    # and finally docker machine
-    echo Check/Installing docker-machine
-    dc=$(which docker-machine)
-    
+    echo "starting local swarm cluster"
+    swarm_test=$(docker stack ps test)
     if [ $? -ne 0 ]; then
-        curl -L https://github.com/docker/machine/releases/download/v0.6.0/docker-machine-`uname -s`-`uname -m` > docker-machine
-        chmod +x docker-machine
-        sudo mv docker-machine /usr/local/bin/docker-machine
-    fi 
-    
-    # add apache bench
+        # manager_token=$(docker swarm join-token --quiet manager)
+        docker swarm init --advertise-addr eth0
+        swarm_init_cmd=$(docker swarm join-token manager | sed -n 3p | sed -e 's/^[ \t]*//')
+        $swarm_init_cmd
+    fi
+    echo "building local images. please be patient as this will take a while..."
+    docker-compose build
+    # add ab
     sudo apt-get install -y apache2-utils
-    echo
-    echo sudo docker version
-    sudo docker version    
-    echo 
     echo please logout and relogin so that the group settings 
-    echo are applied to your session
-    echo
     exit
 fi
 
-# Help 
-if [ $# -lt 1 ] || [ "$1" = "help" ]; then
+# script help
+print_help() { 
+   echo "$PROGNAME: script to install and deploy docker containers of static and dynamic content"
+   echo "usage: $PROGNAME [arg]"
    echo
-   echo "$pn usage: command [arg...]"
+   echo "Options:"
    echo
-   echo "Commands:"
-   echo
-   echo "train      Creates the training environment"
-   echo "prod       Creates the production environment"
-   echo "pack       Tag and push production images"
-   echo "status     Display the status of the environment"
-   echo "test       Quick test - header info only" 
-   echo "bench      Run benchmarking tests" 
-   echo "clean      Removes dangling images and exited containers"
-   echo "images     List images"
-   echo
+   echo "testing    setup the local testing environment"
+   echo "status     shows the docker stack status"
+   echo "benchmark  run ab tests" 
+   echo "images     list images"
    exit
-fi 
+}
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# training
-if [ "$1" = "train" ]; then
+if [ $# -lt 1 ] || [ "$1" = "help" ]; then
+    print_help
+    exit 0
+fi
+
+
+if [ "$1" = "testing" ]; then
 	if [ $# -lt 2 ]; then
         echo
-        echo "usage : $pn $1 [ build | up | down ]"
+        echo "usage : $PROGNAME $1 [ deploy | rm | services ]"
     else
-        cd $1
-            cmd="$2"
-            if [ "$2" = "build" ]; then docker build -t train_web ./web;fi
-            if [ "$2" = "up" ]; then cmd="up -d";fi;
-            docker-compose $cmd $3 $4
-            if [ "$2" = "build" ]; then echo;docker images
-            else echo;docker-compose ps;fi        
-        cd ..
+        echo "building images. this will take a little while...."
+        if [ "$2" = "deploy" ]; then docker stack deploy --compose-file docker-stack.yml companynews;fi
+        if [ "$2" = "rm" ]; then docker stack rm companynews;fi
+        if [ "$2" = "services" ]; then docker stack services companynews
+        else echo;docker stack ps companynews;fi        
     fi
 	echo
     exit
 fi    	
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# prod
-if [ "$1" = "prod" ]; then
-	if [ $# -lt 2 ]; then
-        echo
-        echo "usage : $pn $1 [ build | up | down ]"
-    else
-        cd $1
-            cmd="$2"
-            if [ "$2" = "up" ]; then cmd="up -d";fi;
-            docker-compose $cmd $3 $4
-            if [ "$2" = "build" ]; then docker pull dockercloud/haproxy:1.2.1;echo;docker images
-            else echo;docker-compose ps;fi        
-        cd ..
-    fi
-	echo
-    exit
-fi  
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # status
 if [ "$1" = "status" ]; then
-    env | grep DOCKER
-    docker ps -a
+    docker stack ls
 	echo;exit
 fi      	
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# pack
-if [ "$1" = "pack" ]; then
-    docker tag prod_static codemarc/twipstatic
-    docker tag prod_web codemarc/twipweb
-    docker push codemarc/twipstatic
-    docker push codemarc/twipweb
-	echo;exit
-fi
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# test
-if [ "$1" = "test" ]; then
+# basic testing
+if [ "$1" = "testing" ]; then
     echo curl -I -X GET http://localhost/
-    curl -I -X GET http://localhost/$2
 	echo;exit
 fi
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# bench
+# benchmark
 if [ "$1" = "bench" ]; then
-    echo ab -n 1000 -c 10 http://localhost/
-    ab -n 1000 -c 10 http://localhost/
+    echo "ab -k -n 10000 -c 10 http://localhost/"
+    ab -k -n 10000 -c 10 http://localhost/
 	echo;exit
 fi
       	
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # images
 if [ "$1" = "images" ]; then
-    docker images
+    if [ $# -lt 2 ]; then
+        echo
+        echo "usage : $PROGNAME $1 [ list | rm ]"
+    else
+        if [ "$2" = "list" ]; then docker images;fi
+        if [ "$2" = "rm" ]; then docker rmi `docker images -q`
+        else echo; docker images;fi
 	echo;exit
+    fi
 fi    	
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# clean
-if [ "$1" = "clean" ]; then
-	if [ "$2" = "all" ]; then docker rmi $(docker images -q)
-    elif [ "$2" = "up" ]; then cleanup
-    else
-        echo
-        echo "usage : $pn clean [ up | all ]";
-	fi
-	echo;exit;	
-fi;
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Unknown
 echo
-(>&2 echo $pn: UNKNOWN COMMAND [\"$1\"])
-$0 help
+(>&2 echo $PROGNAME: UNKNOWN COMMAND [\"$1\"])
+print_help
 exit
- 
