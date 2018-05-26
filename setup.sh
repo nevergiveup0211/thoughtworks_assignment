@@ -18,11 +18,14 @@ if [ ! -x "$(which docker)" ]; then
     echo "installing docker-ce"
     if [ ! -x "$(which docker)" ]; then
         curl -sSL https://get.docker.com |sh
-        echo;exit
+        echo;
+    fi    
     # update user with docker group. to run docker commands with out sudo
     u="$USER"
-    [ ! -x "$(getent group docker | grep $u)" ] && sudo usermod -aG docker $u
-    echo "please exit the session for the user permission to take effect"
+    user_cmd=$(getent group docker | grep $u)
+    if [ $? -ne 0 ]; then
+        sudo usermod -aG docker $u
+        echo "please exit the session for the user permission to take effect"
     fi
         
     echo "installing docker-compose"
@@ -57,7 +60,7 @@ if [ $# -lt 1 ] || [ "$1" = "help" ]; then
 fi
 
 # setup swarm
-if [ "$1" = "swarm"]; then  
+if [ "$1" = "swarm" ]; then  
     echo "starting local swarm cluster"
     swarm_test=$(docker stack ls)
     if [ $? -ne 0 ]; then
@@ -65,7 +68,11 @@ if [ "$1" = "swarm"]; then
         docker swarm init --advertise-addr eth0
         swarm_init_cmd=$(docker swarm join-token manager | sed -n 3p | sed -e 's/^[ \t]*//')
         $swarm_init_cmd
+    else
+        echo "swarm is already setup"
     fi
+    echo
+    exit
 fi
 
 # building
@@ -82,13 +89,14 @@ if [ "$1" = "testing" ]; then
         echo "swarm is not setup yet. setting up swarm"
         echo "run $PROGNAME swarm"
     fi
-    # building images locally
-    echo "building local images. please be patient as this will take a while..."
-    docker-compose build 
+
 	if [ $# -lt 2 ]; then
         echo
         echo "usage : $PROGNAME $1 [ deploy | rm | services ]"
     else
+        # building images locally
+        echo "building local images. please be patient as this will take a while..."
+        docker-compose build 
         if [ "$2" = "deploy" ]; then docker stack deploy --compose-file docker-stack.yml companynews;fi
         if [ "$2" = "rm" ]; then docker stack rm companynews;fi
         if [ "$2" = "services" ]; then docker stack services companynews
@@ -112,7 +120,7 @@ if [ "$1" = "testing" ]; then
 fi
 
 # benchmark
-if [ "$1" = "bench" ]; then
+if [ "$1" = "benchmark" ]; then
     echo "ab -k -n 10000 -c 10 http://localhost/"
     ab -k -n 10000 -c 10 http://localhost/
 	echo;exit
