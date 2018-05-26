@@ -7,6 +7,7 @@ AUTHOR="Sri Krishna G"
 PROGNAME=`basename $0`
 VERSION="0.1.0"
 
+# docker,docker-compose setup
 if [ ! -x "$(which docker)" ]; then
     unamestr=`uname` 
     if [[ "$unamestr" != 'Linux' ]]; then
@@ -30,13 +31,8 @@ if [ ! -x "$(which docker)" ]; then
         sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
     fi
-
-    echo "building local images. please be patient as this will take a while..."
-    docker-compose build
-    # add ab
     sudo apt-get install -y apache2-utils
-    echo please logout and relogin so that the group settings 
-    exit
+    echo please logout and relogin so that the group settings
 fi
 
 # script help function
@@ -51,12 +47,19 @@ print_help() {
    echo "swarm      setup local swarm cluster with one node"
    echo "benchmark  run ab tests" 
    echo "images     list images"
+   # echo "build     build images"
    exit
 }
 
+if [ $# -lt 1 ] || [ "$1" = "help" ]; then
+    print_help
+    exit 0
+fi
+
+# setup swarm
 if [ "$1" = "swarm"]; then  
     echo "starting local swarm cluster"
-    swarm_test=$(docker stack ps test)
+    swarm_test=$(docker stack ls)
     if [ $? -ne 0 ]; then
         # manager_token=$(docker swarm join-token --quiet manager)
         docker swarm init --advertise-addr eth0
@@ -65,23 +68,27 @@ if [ "$1" = "swarm"]; then
     fi
 fi
 
-if [ $# -lt 1 ] || [ "$1" = "help" ]; then
-    print_help
-    exit 0
-fi
+# building
+# if [ "$1" = "build"]; then  
+#     echo "building local images. please be patient as this will take a while..."
+#     docker-compose build 
+#     exit
+# fi
 
-
+# testing
 if [ "$1" = "testing" ]; then
-    swarm_test=$(docker stack ps test)
+    swarm_test=$(docker stack ls)
     if [ $? -ne 0 ]; then
-        echo "swarm is not setup yet. plese run the below command"
+        echo "swarm is not setup yet. setting up swarm"
         echo "run $PROGNAME swarm"
     fi
+    # building images locally
+    echo "building local images. please be patient as this will take a while..."
+    docker-compose build 
 	if [ $# -lt 2 ]; then
         echo
         echo "usage : $PROGNAME $1 [ deploy | rm | services ]"
     else
-        echo "building images. this will take a little while...."
         if [ "$2" = "deploy" ]; then docker stack deploy --compose-file docker-stack.yml companynews;fi
         if [ "$2" = "rm" ]; then docker stack rm companynews;fi
         if [ "$2" = "services" ]; then docker stack services companynews
@@ -100,6 +107,7 @@ fi
 # basic testing
 if [ "$1" = "testing" ]; then
     echo curl -I -X GET http://localhost/
+    curl -I -X GET http://localhost/
 	echo;exit
 fi
 
@@ -123,7 +131,7 @@ if [ "$1" = "images" ]; then
     fi
 fi    	
 
-# Unknown
+# command not matching
 echo
 (>&2 echo $PROGNAME: UNKNOWN COMMAND [\"$1\"])
 print_help
