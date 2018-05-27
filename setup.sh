@@ -134,6 +134,7 @@ if [ "$1" = "images" ]; then
     if [ $# -lt 2 ]; then
         echo
         echo "usage : $PROGNAME $1 [ list | rm ]"
+	echo;exit
     else
         if [ "$2" = "list" ]; then docker images;fi
         if [ "$2" = "rm" ]; then docker rmi `docker images -q`
