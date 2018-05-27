@@ -18,7 +18,7 @@ This setup is for bringing up the testing env as detailed in https://www.dropbox
 * Monitoring
 * Centralised Logging
 * Application metrics
-
+* Build and CI systems
 
 ## Assumptions
 
@@ -32,9 +32,14 @@ This setup is for bringing up the testing env as detailed in https://www.dropbox
 
 ## Setup and script details
 
-* In a Ubuntu 14/16 box with "git" installed clone this repo
+* In a Ubuntu 14/16 box with " git " installed clone this repo
 
 ```
 git clone https://github.com/krishnaghatti/thoughtworks_assignment.git
 ```
+
+* The repo " thoughtworks_assignment " has a script " setup.sh " which will be the base for setting up the system.
+* Change the current working directly to " thoughtworks_assignment "
+* The first time the script is run will check if docker, docker-compose are installed and install them if required.
+* Once the first step is complete, user has to log out of the current session and log back in for the group setting to take effect.
 
