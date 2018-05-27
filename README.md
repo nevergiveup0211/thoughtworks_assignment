@@ -199,6 +199,9 @@ sdr94oewv4sq        companynews_static    replicated          1/1               
 	* For scale this can be changed a bit.
 		* In case of AWS ECS, we can add a load balancer such as ALB in front of the backend servers distributing the load.
 		* Below is another possible setup with Mesos/Marathon
+	* Config of a container should be out of the image and be volume mounted with configs of the respective env. This gives the flexibility of using the image in stage/integation/prod etc. (https://docs.docker.com/storage/volumes/)  
+	* The volume for storing data in Prevayler can also be volume mounted. This will help in production where all the scaled containers will share a common volume to have the data across containers. Kubernetes has the option of Persistent Volumes which can suit well in this case.
+
 
 ### Mesos/Marathon setup
                                                     +-----------------+         +-----------------------+
@@ -235,6 +238,9 @@ Below are a few details and ways for each of the components
 * Docker swarm in production - https://rock-it.pl/tips-for-using-docker-swarm-mode-in-production/
 * Swarm migration from cloud https://docs.docker.com/docker-cloud/migration/cloud-to-swarm/#top--and-sub-level-keys
 * Jetty vs tomcat https://www.dailyrazor.com/blog/tomcat-vs-jetty/
+* Docker volumes https://docs.docker.com/storage/volumes/
+* Kubernetes Persistent Volumes - https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/
+								- https://kubernetes.io/docs/tasks/access-application-cluster/communicate-containers-same-pod-shared-volume/
 
 > The tools mentioned are the ones that I have worked with and have proved to work at crazy scales. These are a lot of other tools that are available and each has to be picked based on the requirement and not on general popularity. 
 
