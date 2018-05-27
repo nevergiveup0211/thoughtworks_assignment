@@ -173,15 +173,15 @@ sdr94oewv4sq        companynews_static    replicated          1/1               
 		* In case of AWS ECS, we can add a load balancer such as ALB in front of the backend servers distributing the load.
 		* Below is another possible setup with Mesos/Marathon
 
-        *                                            +-----------------+         +---------------------+
-        *                                            |                 |         |Docker hosts         |
-        * User requests +----> DNS Server    +----->   | HAproxy cluster | +-----> |with the applications|
-        *                    (AWS Route 53)          |                 |         |                     |
-        *                                            +-----------------+         +---------------------+
-
-        * The HAP group is scalable on demand
-        * HAP config will have the backends defined per app
-        * As and when there is a change in the containers, the HAP config is updated
+### Mesos/Marathon setup
+                                                    +-----------------+         +---------------------+
+                                                    |                 |         |Docker hosts         |
+         User requests +----> DNS Server    +----->   | HAproxy cluster | +-----> |with the applications|
+                            (AWS Route 53)          |                 |         |                     |
+                                                    +-----------------+         +---------------------+
+         . The HAP group is scalable on demand
+         . HAP config will have the backends defined per app
+         . As and when there is a change in the containers, the HAP config is updated
 
 ## What's missing in the script 
 
