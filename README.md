@@ -12,14 +12,8 @@ This setup is for bringing up the testing env as detailed in https://www.dropbox
 * ubuntu 14.04
 * Docker 18.05.0-ce
 * docker-compose 1.21.2
-* docker swarm
+* docker swarm (single node cluster where the manager node will be acting as worker as well)
 
-## What's Missing
-
-* Monitoring
-* Centralised Logging
-* Application metrics
-* Build and CI systems
 
 ## Assumptions
 
@@ -64,6 +58,13 @@ thoughtworks_assignment/
 * Vagrantfile - a vagrant file to setup a ubuntu 14.04 iamge 
 
 ## Setup and script details
+
+                               +---------------+          +-----------------------------------+
+                               |               |          |                                   |
+        User requests+--------> Nginx/Haproxy  +--------->  Dynamic content on JETTY server   |
+                               |               |          |                                   |
+                               +---------------+          +-----------------------------------+
+
 
 * In a Ubuntu 14/16 box with " git " installed clone this repo
 
@@ -130,13 +131,58 @@ p1ugfadhqjhj        companynews_dynamic.1   thoughtworks_assignment_dynamic:late
 
 ## Production setup
 
-* TL;DR 
+### TL;DR 
 ```
 - Docker swarm for small stups
-- Mesos/Marathon or Kubernetes for medium, large and extra large setups
+- Mesos/Marathon or Kubernetes for medium, large and extra large setups requiring high availability. 
 ```
-* In case of a small setup where the number of applications is sane, using docker swarm mode in priduction
-* Production setup for an application that is targeting 4-9’s availability requires a different take. Though the docker swarm 
+### A bit more detailed explanation of the production setup
+
+* In case of a small setup where the number of applications is sane, using docker swarm mode in production works fine. 
+* Scaling of services in a swarm is straightforward. 
+* For scaling one service of a stack in a docker swarm cluster:
+```
+$ docker service ls
+ID                  NAME                  MODE                REPLICAS            IMAGE                                    PORTS
+8cf3hgabta06        companynews_dynamic   replicated          1/1                 thoughtworks_assignment_dynamic:latest   *:8080->8080/tcp
+sdr94oewv4sq        companynews_static    replicated          1/1                 thoughtworks_assignment_static:latest    *:80->80/tcp
+
+$ docker service scale companynews_dynamic=2
+companynews_dynamic scaled to 2
+overall progress: 2 out of 2 tasks
+1/2: running   [==================================================>]
+2/2: running   [==================================================>]
+verify: Service converged
+
+$ docker service ls
+ID                  NAME                  MODE                REPLICAS            IMAGE                                    PORTS
+8cf3hgabta06        companynews_dynamic   replicated          2/2                 thoughtworks_assignment_dynamic:latest   *:8080->8080/tcp
+sdr94oewv4sq        companynews_static    replicated          1/1                 thoughtworks_assignment_static:latest    *:80->80/tcp
+```  
+* Production setup for an application that is targeting 4-9’s availability requires a different take. Managing large clusters with docker swarm becomes a bit tedious.
+* Requirements for a production setup:
+	* HA for individual components
+	* Monitoring/Alerting for Infra componetns
+	* Application latency metrics
+	* Circuit Breakers for backend/thirdparty systems
+	* Ability to scale individual components on demad
+* Getting into a bit more details 
+	* Both nginx and haproxy are built to handle scale and load.
+	* In the current implementation the dynamic content container vhost is defined as the HOST in proxy pass of nginx configuration
+	* For scale this can be changed a bit.
+		* In case of AWS ECS, we can add a load balancer such as ALB in front of the backend servers distributing the load.
+		* 
+
+
+
+
+
+## What's missing in the script 
+
+* Monitoring
+* Centralised Logging
+* Application metrics
+* Build and CI systems
 
 
 ## References
