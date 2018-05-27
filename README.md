@@ -142,4 +142,4 @@ p1ugfadhqjhj        companynews_dynamic.1   thoughtworks_assignment_dynamic:late
 ## References
 
 * Docker swarm in production - https://rock-it.pl/tips-for-using-docker-swarm-mode-in-production/
-* Docker 
+* Swarm migration from cloud https://docs.docker.com/docker-cloud/migration/cloud-to-swarm/#top--and-sub-level-keys
