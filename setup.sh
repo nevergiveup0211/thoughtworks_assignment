@@ -16,7 +16,9 @@ if [ ! -x "$(which docker)" ]; then
     fi
      
     echo "installing docker-ce"
-    if [ ! -x "$(which docker)" ]; then
+    docker_cmd=$(which docker)
+    if [ $? -ne 0 ]; then
+        echo "installing docker. please check the scripts that are downloaded from the web before running on any system !!!"
         curl -sSL https://get.docker.com |sh
         echo;
     fi    
