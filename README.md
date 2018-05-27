@@ -21,7 +21,7 @@ This setup is for bringing up the testing env as detailed in https://www.dropbox
 
 ```
 - assuming a ubuntu linux workstation 
-- the setup will be done ove a single node docker swarm cluster
+- the setup will be done on a single node docker swarm cluster
 - eth0 will be the default interface for swarm interface
 - docker stack name used is companynews
 ```
@@ -34,18 +34,18 @@ thoughtworks_assignment/
 ├── docker-compose.yml
 ├── docker-stack.yml
 ├── dynamic
-│   └── Dockerfile
+│   └── Dockerfile
 ├── README.md
 ├── setup.sh
 ├── static
-│   ├── default.conf
-│   └── Dockerfile
+│   ├── default.conf
+│   └── Dockerfile
 ├── steps
 ├── test_results
-│   ├── ab_with_1_dynamic_1_static
-│   ├── ab_with_5_dynamic_1_static
-│   ├── ab_with_5_dynamic_3_static
-│   └── ab_with_5_dynamic_3_static_and_keep_alive
+│   ├── ab_with_1_dynamic_1_static
+│   ├── ab_with_5_dynamic_1_static
+│   ├── ab_with_5_dynamic_3_static
+│   └── ab_with_5_dynamic_3_static_and_keep_alive
 └── Vagrantfile
 ```
 
@@ -55,7 +55,7 @@ thoughtworks_assignment/
 * static - contains the docker file for the static app hosting the static content on a NGINX server 
 * setup.sh - the setup bash script
 * test_results - test results with the file name showing the test inputs.
-* Vagrantfile - a vagrant file to setup a ubuntu 14.04 iamge 
+* Vagrantfile - a vagrant file to setup a ubuntu 14.04 image 
 
 ## Setup and script details
 
@@ -76,7 +76,7 @@ git clone https://github.com/krishnaghatti/thoughtworks_assignment.git
 * Change the current working directly to " thoughtworks_assignment "
 * The first time the script is run will check if docker, docker-compose are installed and install them if required.
 * Once the first step is complete, user has to log out of the current session and log back in for the group setting to take effect.
-* Running the script with out any arguments will give the options available.
+* Running the script without any arguments will give the options available.
 
 ```
 $ ./setup.sh
@@ -133,7 +133,7 @@ p1ugfadhqjhj        companynews_dynamic.1   thoughtworks_assignment_dynamic:late
 
 ### TL;DR 
 ```
-- Docker swarm for small stups
+- Docker swarm for small setups
 - Mesos/Marathon or Kubernetes for medium, large and extra large setups requiring high availability. 
 ```
 ### A bit more detailed explanation of the production setup
@@ -162,10 +162,10 @@ sdr94oewv4sq        companynews_static    replicated          1/1               
 * Production setup for an application that is targeting 4-9’s availability requires a different take. Managing large clusters with docker swarm becomes a bit tedious.
 * Requirements for a production setup:
 	* HA for individual components
-	* Monitoring/Alerting for Infra componetns
+	* Monitoring/Alerting for Infra components
 	* Application latency metrics
-	* Circuit Breakers for backend/thirdparty systems
-	* Ability to scale individual components on demad
+	* Circuit Breakers for backend/third party systems
+	* Ability to scale individual components on demand
 * Getting into a bit more details 
 	* Both nginx and haproxy are built to handle scale and load.
 	* In the current implementation the dynamic content container vhost is defined as the HOST in proxy pass of nginx configuration
@@ -174,24 +174,39 @@ sdr94oewv4sq        companynews_static    replicated          1/1               
 		* Below is another possible setup with Mesos/Marathon
 
 ### Mesos/Marathon setup
-                                                    +-----------------+         +---------------------+
-                                                    |                 |         |Docker hosts         |
-         User requests +----> DNS Server    +----->   | HAproxy cluster | +-----> |with the applications|
-                            (AWS Route 53)          |                 |         |                     |
-                                                    +-----------------+         +---------------------+
+                                                    +-----------------+         +-----------------------+
+                                                    |                 |         |Docker hosts           |
+         User requests +----> DNS Server    +-----> | HAproxy cluster | +-----> |with the applications  |
+                            (AWS Route 53)          |                 |         |                       |
+                                                    +-----------------+         +-----------------------+
          . The HAP group is scalable on demand
          . HAP config will have the backends defined per app
          . As and when there is a change in the containers, the HAP config is updated
 
 ## What's missing in the script 
 
-* Monitoring
+Below are a few details and ways for each of the components
+
+* Monitoring Infra/Application metrics
+	* Container monitoring is a tough challenge. Any issues/load on the underlying infra will have a cascading effect on the containers spread across the system.
+	* Prometheus is an easy to implement monitoring and alerting systems that works at scale. The only issue is with the availability of the system as there is no HA out of the box. 
+	* Sysdig and Netsil are other promising commercial offers that work at scale with excellent clustering views
+
 * Centralised Logging
-* Application metrics
-* Build and CI systems
+	* ELK stack pulling logs of the containers 
+	* fluentbit (https://fluentbit.io/) is another agent that can take multiple inputs and push to multiple outputs.
+
+
+* Build,Artifact store and CI systems
+	* Jenkins is a standard CI tool which can integrate pretty well with any systems.
+	* Other integrations that can give added advantage are Clair (https://github.com/coreos/clair) for static vulnerability analysis for containers
+	* Artifactory/Nexus for storing the built artifacts.
 
 
 ## References
 
 * Docker swarm in production - https://rock-it.pl/tips-for-using-docker-swarm-mode-in-production/
 * Swarm migration from cloud https://docs.docker.com/docker-cloud/migration/cloud-to-swarm/#top--and-sub-level-keys
+
+> The tools mentioned are the ones that I have worked with and have proved to work at crazy scales. These are a lot of other tools that are available and each has to be picked based on the requirement and not on general popularity. 
+
