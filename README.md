@@ -171,11 +171,30 @@ sdr94oewv4sq        companynews_static    replicated          1/1               
 	* In the current implementation the dynamic content container vhost is defined as the HOST in proxy pass of nginx configuration
 	* For scale this can be changed a bit.
 		* In case of AWS ECS, we can add a load balancer such as ALB in front of the backend servers distributing the load.
-		* 
+		* Below is another possible setup with Mesos/Marathon
 
 
-
-
+                                                                                   +----+
+                                                                                   |
+                                                                                   | +---------------------+
+                                                                                   | |Docker hosts         |
+                                                                                   | |with the applications|
+                                                       +-----------------+         | +---------------------+
+                                                       |                 |         |
+          User requests +----> DNS Server    +----->   | HAproxy cluster | +-----> |
+                               (AWS Route 53)          |                 |         | +---------------------+
+                                                       +-----------------+         | |Docker hosts         |
+                                                                                   | |with the applications|
+                                                      .The HAP group is scalable   | +---------------------+
+                                                       on demand                   |
+                                                      .HAP config will have the    |
+                                                       backends defined per app    | +---------------------+
+                                                      .As and when there is a      | |Docker hosts         |
+                                                      change in the containers,    | |with the applications|
+                                                      the HAP config is updated    | +---------------------+
+                                                                                   |
+                                                                                   +----+
+          
 
 ## What's missing in the script 
 
