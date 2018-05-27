@@ -90,6 +90,7 @@ if [ "$1" = "testing" ]; then
     if [ $? -ne 0 ]; then
         echo "swarm is not setup yet. setting up swarm"
         echo "run $PROGNAME swarm"
+	echo;exit
     fi
 
 	if [ $# -lt 2 ]; then
