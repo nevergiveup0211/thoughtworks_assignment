@@ -207,6 +207,7 @@ Below are a few details and ways for each of the components
 
 * Docker swarm in production - https://rock-it.pl/tips-for-using-docker-swarm-mode-in-production/
 * Swarm migration from cloud https://docs.docker.com/docker-cloud/migration/cloud-to-swarm/#top--and-sub-level-keys
+* Jetty vs tomcat https://www.dailyrazor.com/blog/tomcat-vs-jetty/
 
 > The tools mentioned are the ones that I have worked with and have proved to work at crazy scales. These are a lot of other tools that are available and each has to be picked based on the requirement and not on general popularity. 
 
