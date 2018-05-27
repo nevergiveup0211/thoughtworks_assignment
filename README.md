@@ -125,10 +125,37 @@ p1ugfadhqjhj        companynews_dynamic.1   thoughtworks_assignment_dynamic:late
 ```
 
 * Additional options of the script.
-```
 
-```
+	* Images listing
+	```
+	$ ./setup.sh images list
+	REPOSITORY                        TAG                 IMAGE ID            CREATED             SIZE
+	thoughtworks_assignment_static    latest              a14adf433619        10 hours ago        126MB
+	thoughtworks_assignment_dynamic   latest              d1cd40da32a0        10 hours ago        635MB
+	openjdk                           latest              d480a7da7735        12 days ago         624MB
+	nginx                             latest              ae513a47849c        3 weeks ago         109MB
+	```
+	* Stack status
+	```
+	$ ./setup.sh status
+	NAME                SERVICES
+	companynews         2
+	```
+	* Basic  Benchmark tests
+	```
+	./setup.sh benchmark
+	ab -k -n 10000 -c 10 http://localhost/
+	This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+	Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+	Licensed to The Apache Software Foundation, http://www.apache.org
+	Benchmarking localhost (be patient)
+	Completed 1000 requests
+	.....
+	.....
+	```
 
+		* Outputs of other tests are available in test_results folder
+		
 ## Production setup
 
 ### TL;DR 
