@@ -12,6 +12,7 @@ This setup is for bringing up the testing env as detailed in https://www.dropbox
 * ubuntu 14.04
 * Docker 18.05.0-ce
 * docker-compose 1.21.2
+* docker swarm
 
 ## What's Missing
 
@@ -26,9 +27,41 @@ This setup is for bringing up the testing env as detailed in https://www.dropbox
 
 ```
 - assuming a ubuntu linux workstation 
+- the setup will be done ove a single node docker swarm cluster
 - eth0 will be the default interface for swarm interface
 - docker stack name used is companynews
 ```
+
+## Directory structure
+
+```
+thoughtworks_assignment/
+├── assumptions
+├── docker-compose.yml
+├── docker-stack.yml
+├── dynamic
+│   └── Dockerfile
+├── README.md
+├── setup.sh
+├── static
+│   ├── default.conf
+│   └── Dockerfile
+├── steps
+├── test_results
+│   ├── ab_with_1_dynamic_1_static
+│   ├── ab_with_5_dynamic_1_static
+│   ├── ab_with_5_dynamic_3_static
+│   └── ab_with_5_dynamic_3_static_and_keep_alive
+└── Vagrantfile
+```
+
+* docker-stack.yml - the docker swarm stack file
+* docker-compose.yml - docker compose file which will be used to build required images or can be used individually as well
+* dynamic - contains the docker file for the dynamic app hosting the WAR file on a JETTY server
+* static - contains the docker file for the static app hosting the static content on a NGINX server 
+* setup.sh - the setup bash script
+* test_results - test results with the file name showing the test inputs.
+* Vagrantfile - a vagrant file to setup a ubuntu 14.04 iamge 
 
 ## Setup and script details
 
@@ -42,4 +75,42 @@ git clone https://github.com/krishnaghatti/thoughtworks_assignment.git
 * Change the current working directly to " thoughtworks_assignment "
 * The first time the script is run will check if docker, docker-compose are installed and install them if required.
 * Once the first step is complete, user has to log out of the current session and log back in for the group setting to take effect.
+* Running the script with out any arguments will give the options available.
+
+```
+$ ./setup.sh
+setup.sh: script to install and deploy docker containers of static and dynamic content
+usage: setup.sh [arg]
+
+Options:
+
+testing    setup the local testing environment
+status     shows the docker stack status
+swarm      setup local swarm cluster with one node
+benchmark  run ab tests
+images     list images
+```
+
+* For setting up a single node docker swarm:
+
+```
+$ ./setup.sh swarm
+starting local swarm cluster
+....
+....
+```
+
+* Once the swarm cluster is up and running:
+
+```
+$ ./setup.sh swarm
+starting local swarm cluster
+swarm is already setup
+```
+* To bring up the test env:
+
+```
+$ ./setup.sh testing deploy
+```
+This will build the required images from the 
 
