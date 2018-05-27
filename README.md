@@ -123,4 +123,21 @@ p1ugfadhqjhj        companynews_dynamic.1   thoughtworks_assignment_dynamic:late
 
 ```
 
+* Additional options of the script.
+```
 
+```
+
+## Production setup
+
+* TL;DR 
+```
+- In case of a small setup where the number of applications is sane, using docker swarm mode in priduction 
+```
+* Production setup for an application that is targeting 4-9’s availability requires a different take. Though the docker swarm 
+
+
+## References
+
+* Docker swarm in production - https://rock-it.pl/tips-for-using-docker-swarm-mode-in-production/
+* Docker 
