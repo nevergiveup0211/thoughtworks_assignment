@@ -112,5 +112,15 @@ swarm is already setup
 ```
 $ ./setup.sh testing deploy
 ```
-This will build the required images from the 
+This will build the required images from the docker compose file provided and save it locally.
+
+* At the end of the deploy, the script outputs the cluster status - the output of "stack ps companynews"
+
+```
+ID                  NAME                    IMAGE                                    NODE                       DESIRED STATE       CURRENT STATE                     ERROR                       PORTS
+5hthxflo93g5        companynews_static.1    thoughtworks_assignment_static:latest                               Ready               Pending less than a second ago
+p1ugfadhqjhj        companynews_dynamic.1   thoughtworks_assignment_dynamic:latest   vagrant-ubuntu-trusty-64   Running             Assigned less than a second ago
+
+```
+
 
