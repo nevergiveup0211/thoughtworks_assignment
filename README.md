@@ -173,6 +173,7 @@ sdr94oewv4sq        companynews_static    replicated          1/1               
 		* In case of AWS ECS, we can add a load balancer such as ALB in front of the backend servers distributing the load.
 		* Below is another possible setup with Mesos/Marathon
 
+*
                                                                          +----+
                                                                          |
                                                                          | +---------------------+
