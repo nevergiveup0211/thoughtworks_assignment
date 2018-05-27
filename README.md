@@ -239,8 +239,8 @@ Below are a few details and ways for each of the components
 * Swarm migration from cloud https://docs.docker.com/docker-cloud/migration/cloud-to-swarm/#top--and-sub-level-keys
 * Jetty vs tomcat https://www.dailyrazor.com/blog/tomcat-vs-jetty/
 * Docker volumes https://docs.docker.com/storage/volumes/
-* Kubernetes Persistent Volumes - https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/
-								- https://kubernetes.io/docs/tasks/access-application-cluster/communicate-containers-same-pod-shared-volume/
+* Kubernetes: Persistent Volumes - https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/
+* Kubernetes: Communicate Between Containers in the Same Pod - https://kubernetes.io/docs/tasks/access-application-cluster/communicate-containers-same-pod-shared-volume/
 
 > The tools mentioned are the ones that I have worked with and have proved to work at crazy scales. These are a lot of other tools that are available and each has to be picked based on the requirement and not on general popularity. 
 
