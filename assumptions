@@ -1,3 +1,5 @@
+Below are a few assumptions for the setup.
+
 - assuming a ubuntu linux workstation 
 - eth0 will be the default interface for swarm interface
-- docker stack name is companynews
+- docker stack name used is companynews
